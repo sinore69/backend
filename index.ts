@@ -14,7 +14,7 @@ export const publicProcedure=t.procedure;
 
 
 export const appRouter=router({
-    getjokes:publicProcedure.query(async()=>{
+    get:publicProcedure.query(async()=>{
         const jokes=(await axios.get('https://api.chucknorris.io/jokes/random')).data
         return jokes.value
     })
