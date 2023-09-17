@@ -7,6 +7,12 @@ require('dotenv').config();
 const express = require('express');
 const { OpenAI } = require("langchain/llms/openai");
 const { TextLoader } = require("langchain/document_loaders/fs/text");
+const { CheerioWebBaseLoader } = require("langchain/document_loaders/web/cheerio");
+const { RecursiveCharacterTextSplitter } = require( "langchain/text_splitter");
+const { OpenAIEmbeddings } = require( "langchain/embeddings/openai");
+const { MemoryVectorStore } = require( "langchain/vectorstores/memory");
+const { RetrievalQAChain } = require( "langchain/chains");
+const { ChatOpenAI } = require("langchain/chat_models/openai");
 
 const app=express();
 app.use(cors());
@@ -16,23 +22,33 @@ export const router =t.router;
 export const publicProcedure=t.procedure;
 
 const llm = new OpenAI({
-    openAIApiKey: "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",
+    openAIApiKey: "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",
     temperature: 0.9,
   });
 
+  const textSplitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 500,
+    chunkOverlap: 0,
+  });
+  
+  const loader = new CheerioWebBaseLoader(
+    "https://github.com/sinore69/backend/blob/main/data.txt"
+  );
 
-  const loader = new TextLoader("src/document_loaders/example_data/example.txt");
-  
-  
-  
+  const embeddings = new OpenAIEmbeddings();
 
 export const appRouter=router({
     get:publicProcedure.query(async()=>{
         const jokes=(await axios.get('https://api.chucknorris.io/jokes/random')).data
-        const res=await llm.call("What would be a good company name for a company that makes colorful socks?");
-        
-        const docs = await loader.load();
-
+        //const res=await llm.call("Why do you think city lights would prevent you from seeing stars");
+        const data = await loader.load();
+        const splitDocs = await textSplitter.splitDocuments(data);
+        const vectorStore = await MemoryVectorStore.fromDocuments(splitDocs, embeddings);
+        const model = new ChatOpenAI({ modelName: "gpt-3.5-turbo" });
+        const chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever());
+        const res = await chain.call({
+            query: "Why do you think city lights would prevent you from seeing stars"
+          });
         return res;
     })
 })
