@@ -4,9 +4,11 @@
         "@trpc/server": "^10.38.0",
         "@types/node": "^20.5.6",
         "axios": "^1.5.0",
+        "cheerio": "^1.0.0-rc.12",
         "cors": "^2.8.5",
         "dotenv": "^16.3.1",
         "express": "^4.18.2",
+        "langchain": "^0.0.150",
         "typescript": "^5.2.2",
         "zod": "^3.22.2"
     },
@@ -17,10 +19,9 @@
     "name": "server",
     "version": "1.0.0",
     "main": "index.ts",
-    "type": "module",
     "scripts": {
         "dev": "nodemon index.ts",
-        "start":"node index.ts"
+        "start": "node index.ts"
     },
     "author": "",
     "license": "ISC",
